@@ -6,6 +6,7 @@ const cors = require('cors');
 
 const mongoose = require('mongoose');
 require('./models/User');
+require('./models/Exercise');
 mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track');
 
 app.use(cors());
