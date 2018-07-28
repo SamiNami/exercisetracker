@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const User = mongoose.model('users');
-const Exercise = mongoose.model('exercises');
+// const Exercise = mongoose.model('exercises');
 
 module.exports = app => {
     app.post('/api/exercise/new-user', async (req, res) => {
@@ -27,14 +27,34 @@ module.exports = app => {
 
         const formattedDate = handleDate(date);
 
-        const exercise = await new Exercise({
-            _userId: userId,
-            description,
-            duration,
-            date: formattedDate
-        }).save();
+        user.logs.push({ description, duration, date: formattedDate });
+        user.count = user.logs.length;
+        user.save();
 
-        res.send(exercise);
+        res.send(user);
+    });
+
+    app.get('/api/exercise/log', async (req, res) => {
+        console.log(req.query);
+        const { userId, from, to, limit } = req.query;
+        if (!userId) {
+            return res.send('You need a userId');
+        }
+
+        let query = {
+            _id: userId
+        };
+        if (from) {
+            const compareDate = toDate(from);
+            query.logs.date = { $gt: compareDate };
+        }
+
+        console.log(query);
+        // 'logs.date': { $gt: 17, $lt: 66 }
+
+        const foundUser = await User.find(query);
+
+        res.send(foundUser);
     });
 };
 
