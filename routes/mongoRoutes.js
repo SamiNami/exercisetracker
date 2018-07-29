@@ -46,7 +46,7 @@ module.exports = app => {
         };
         if (from) {
             const compareDate = toDate(from);
-            query.logs.date = { $gt: compareDate };
+            query.logs = { $lte: compareDate };
         }
 
         console.log(query);
