@@ -35,28 +35,36 @@ module.exports = app => {
     });
 
     app.get('/api/exercise/log', async (req, res) => {
-        console.log(req.query);
         const { userId, from, to, limit } = req.query;
         if (!userId) {
             return res.send('You need a userId');
         }
 
-        let query = {
-            _id: userId
-        };
-        if (from) {
-            const compareDate = toDate(from);
-            query.logs = { $lte: compareDate };
-        }
+        const user = await User.findById(userId);
 
-        console.log(query);
-        // 'logs.date': { $gt: 17, $lt: 66 }
+        //give the values, default values and transform them to date objects
+        const [formattedFrom, formattedTo, formattedLimit] = handleParams(
+            from,
+            to,
+            limit
+        );
 
-        const foundUser = await User.find(query);
+        const filteredLogs = user.logs.filter(exercise => {
+            const date = exercise.date.getTime();
+            return (
+                formattedFrom.getTime() <= date && formattedTo.getTime() >= date
+            );
+        });
 
-        res.send(foundUser);
+        const slicedLogs = filteredLogs.slice(0, formattedLimit);
+
+        res.send(slicedLogs);
     });
 };
+// if the param defualt them to something that will encapsulate everyting
+function handleParams(from = '2000-01-01', to, limit = 100) {
+    return [toDate(from), handleDate(to), parseInt(limit)];
+}
 
 function handleDate(date) {
     // if no date is provied, set the time to now
