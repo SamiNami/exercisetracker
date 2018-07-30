@@ -42,13 +42,13 @@ module.exports = app => {
 
         const user = await User.findById(userId);
 
-        //give the values, default values and transform them to date objects
+        //give the values default values and transform them to date objects
         const [formattedFrom, formattedTo, formattedLimit] = handleParams(
             from,
             to,
             limit
         );
-
+        // filter out logs that are not withing the from and to params
         const filteredLogs = user.logs.filter(exercise => {
             const date = exercise.date.getTime();
             return (
@@ -61,7 +61,7 @@ module.exports = app => {
         res.send(slicedLogs);
     });
 };
-// if the param defualt them to something that will encapsulate everyting
+// if no param, set them to something that will work
 function handleParams(from = '2000-01-01', to, limit = 100) {
     return [toDate(from), handleDate(to), parseInt(limit)];
 }
